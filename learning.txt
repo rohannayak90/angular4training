@@ -1,0 +1,932 @@
+To make angular working on c9, replace this in the start script in package.json
+'ng serve --host 0.0.0.0 --port 8080 --public-host $url --disableHostCheck true'
+and run 'npm start' instead of 'ng serve' to start the application
+
+
+---------------------------------------------------------------------------------------
+
+SECTION 1
+
+Lecture 9 - What is TypeScript
+Typescript - Its a superset of vanilla javascript. It has more features like Types, Classes, Interfaces, etc.
+But as becayse the browser does not suppport Typescript, it is first compiled to Javacript via the CLI prior running in the browser.
+
+Lecture 11
+Adding Bootstrap to Angular project
+While this can be added directly to the index file, it is better to do it the angular way.
+While in the project folder, type "npm install --save bootstrap" in the command line and press enter. This will install the bootstrap into the current project setup and save it as a production dependency.
+Then open the .angular-cli.json file and add the link to the bootstrap file in the styles tag: ../node_modules/bootstrap/dist/css/bootstrap.min.css
+
+--------------------------------------------------------------------------------
+
+SECTION 2
+
+Lecture 14 - How an Angular app gets loaded and started
+- The src/index.html file gets loaded which has a tag <app-root>
+- When the Angular compiles, it makes sure to include the compiled main.ts in the index file. This can be checked while running the app and checking the source.
+- The main.ts file tells angular to include the AppModule from the app.module.ts
+- The app.module.ts contains the declaration for AppComponent module from the app.component.ts file
+- The app.component.ts file has the html and css declarations for the view, which are app.component.html and app.component.css respectively.
+- Any tags added to the app.component.html file gets rendered in the view and any styles given in the app.component.css file gets applied.
+
+Lecture 16 - Creating a Component
+- Create a new folder, conventionally the name of the component. my-own
+- Create a new file inside the folder named my-own.component.ts
+- Create a new file in the same folder named my-own.component.html
+- Add the following lines to the my-own.component.ts file:
+// import the component module
+import { Component } from '@angular/core';
+// Define the selectors, so Angular knows what to do with this class
+@Component({
+    // Required parameters
+    selector: 'my-component', // The selector should not clash with any other selectors
+    //selector: '[my-component]'
+    //selector: '.my-component'
+    templateUrl: './my-own.component.html' // relative link to the html file
+    // Optional Parameters // styles
+    styleUrls: ['./my-own.component.css', ''] // This is an array of relative paths
+})
+// Export the class for use
+export class MyOwnComponent {
+    
+}
+- Add the following lines to my-own.component.html
+<h3>This is MyOwnComponent</h3>
+
+Lecture 17 - Understanding the role of AppModule and Component Declaration
+The AppModule can be seen to have a @NgModule declaration which hold 4 key parameters:
+1. declarations
+2. imports
+3. providers
+4. bootstrap
+
+The MyOwnComponent that we created in the previous part won't be recognized by Angular as till now it has no idea that the component exists.
+To make sure that Angular knows about the custom componet, it is required that it is added to the declarations tag of the AppModule.
+Note: Adding the MyOwnComponent name to the declarations tag should throw a compiler error, so make sure to import it first.
+
+The imports parameter makes it easy to import multiple modules to the app, so as to keep the AppModule leaner when the application becomes very large.
+
+Lecture 18 - Using Custom Components
+To know if the MyOwnComponent that we created earlier is working, open the app.component.html file and add the custom selector tag we defined for our component in the file.
+<my-component></my-component>
+
+Run the application and you should see the "This is MyOwnComponent" on the page
+
+Lecture 19 - Creating components with the CLI and nexting components
+To create components, one can also use the CLI
+'ng generate component servers' or
+'ng g c servers'
+This will create a folder named servers and create a few files, namely:
+servers.component.ts
+servers.component.html
+servers.component.css
+servers.component.spec.ts - This is the Test Script file and has nothing to do with development and hence can be deleted.
+
+Lecture 20 - Working with Component Templates
+While an external templateUrl can be provided in the Custom Component declaration, one can also use inline templates.
+So instead of using
+templateUrl: '/custom.component.html'
+one can also do
+template: '<app-server></app-server><h1>Custom Tags are allowed</h1>'
+also using backticks
+template: 
+    `
+        <app-server></app-server>
+        <h1>Custom Tags are allowed</h1>
+    `
+
+A few things to keep in mind:
+1. At least one of them should be present, ie-template or templateUrl
+2. If defining template, they should not be wrapped to multiline, as typescript doesn't support that in a string.
+3. If multiline string is required, then one can use backticks ` to wrap code templates.
+
+Lecture 21 - Working with component styles
+Similar to that of the template, the styles can also be defined inline.
+
+styles: [`
+    h3 {
+        color: blue;
+    }
+`]
+
+Lecture 22 - Fully understanding the Component Selector
+While the only selector that has been used till now is:
+selector: 'app-servers' - This makes for a tag selector, so needs to be used as
+<app-servers></app-servers>
+This can also be replaced with
+selector: '[app-servers]' - This would make it an attribute selector and can be used as
+<div app-servers></div>
+selector: '.app-servers' - This would make it a class selector and can be used as
+<div class='app-servers'></div>
+
+Lecture 23 - What is DataBinding
+DataBinding is required for communications between the client and the server.
+To output data, one can use:
+1. String Interpolation - {{ data }}
+2. Property Binding - [property]="data"
+To react to user interactions
+1. Event Binding - (event)="expression"
+
+While the above ways are 1-way binding, angualr can be used for 2-way binding by combining the above:
+[(ngModel)]="data"
+
+Lecture 24 - String Interpolation
+The string interpolation can be done by wrapping the expression between double curly braces - 
+{{ expression }}
+The expression can be anything which will return a string, or can be converted to a string, but not multi levels of code. It can be:
+1. A variable name - {{ userName }}
+2. A direct string - {{ 'my name is Anthony' }}
+3. A function which would return a string - getUserName() - A function which would be reyturning a string
+4. Ternary operations - userName ? userName : 'anonymous'
+
+Lecture 25 - Property Binding
+Every HTML element has a lot of properties, but not all can be accessed/set via the attributes.
+For example, 'disabled' is an attribute which when set disables the element. But this is also a property which can be accessed using the [disabled] in the HTML tag and can be used as a property to set.
+<button class="btn" disabled>Click Me</button> Setting the attribute 'disabled'
+<button class="btn" [disabled]=true>Click Me</button> Section the property 'disabled'
+
+Lecture 26 - Property Binding vs String Interpolation
+<p>{{ allowNewServer }}</p>             String Interpolation
+<p [innerText]="allowNewServer"></p>    Property Binding
+Use string interpolation when we have to show some text only.
+User property binding, when there is requirement to bind the property of an element to some variable.
+
+Lecture 27 - Event Binding
+Events can be bound in Angular using the moon brackets.
+(click)="myFunction()" will call the myFunction() available in the .ts file.
+Don't bind to onclick. This is for javascript and not Angular.
+
+Lecture 28 - Bindable properties and events
+A console.log() on the element will provide the events available for binding.
+
+Lecture 29 - Passing and Using Data with Event Binding
+The event data can also be passed on to the function using the $event reserved keyword.
+Usage:
+<input type="text" (input)="onUpdateServerName($event)">
+This will pass the event data to the function and can be used in the following way:
+onUpdateServerName(event:Event) {
+  this.serverName = (<HTMLInputElement>event.target).value; // The (<HTMLInputElement>event.target) is the way to typecase to make sure that the compiler doesn't throw compiling error.
+}
+
+Lecture 30 - Two Way Data-Binding
+Two Way Binding can be implemented combining the square brackets as well as the moon brackets.
+Usage: <input type="text" [(ngModel)]="serverName">
+
+Lecture 31 - Important Notice for Two-Way DataBinding
+For Two-Way DataBinding to work, make sure to import the FormsModule from '@angular/forms' in the app.module.ts, and add it to the imports array.
+
+Lecture 32 - Combining all forms of DataBinding
+
+Lecture 33 - Understanding Directives
+Directives are instructions in the DOM
+<p appTurnGreen>Receives a Green Background</p>
+
+@Directive({
+    selector: '[appTurnGreen]'
+})
+export class TurnGreenDirective {
+    ...
+}
+
+Lecture 34 - Using ngIf to outpt data conditionally
+Usage:
+<p *ngIf="serverCreated">Created Server {{ serverName }}</p>
+Anything can be passed to the *ngIf directive that can return a boolean.
+Based on true/false, the element is either added/removed from the DOM.
+
+Lecture 35 - Enhanced ngIf with the Else condition
+Usage:
+<p *ngIf="serverCreated else noServer">Created Server {{ serverName }}</p>
+<ng-template #noServer>
+    <p>No Server Created</p>
+</ng-template>
+Using the #noServer marks a template for using somewhere else.
+
+Lecture 36 - Styling elements Dynamically with ngStyle
+Usage: <p [ngStyle]="{backgroundColor: getColor()}">
+The ngStyle is a directive and has been implemented with the square brackets to make sure that it is bound to the property ngStyle
+** More information required
+
+Lecture 37 - Applying CSS classes Dynamically with ngClass
+Usage: <p [ngClass]="{online: serverStatus === 'online'}">
+In case of ngClass, it will take a list of key-value pairs, where:
+key = the class to add
+value = the condition
+
+Lecture 38 - Outputting lists with ngFor
+Usage: <app-server *ngFor="let server of servers"></app-server>
+The element in which the *ngFor is used will get replicated for the number of items in the 'servers' array.
+
+Lecture 39 - Getting the index when using ngFor
+The index can be fetched using:
+<p *ngFor="let item of clickCounter; let i = index"></p>
+The i can be replaced with any variable but the index is a reserved keyword.
+
+--------------------------------------------------------------------------------
+
+SECTION 3
+
+Lecture 40 - Project Inroduction
+Lecture 41 - Planning the App
+Lecture 42 - Setting up the application
+Lecture 43 - Creating the Components
+Use the CLI to create the components
+ng g c component-name --spec false - This will not create the testing file.
+
+Lecture 44 - Using the components
+Lecture 45 - Adding a Navigation Bar
+Lecture 46 - Alternative Non-Collapsible Navigation Bar
+Lecture 47 - Create a Recipe model
+Create a new file named recipe.model.ts
+export class Recipe {
+    public name:string;
+    public desc:string;
+    
+    constructor(name:string, desc:string) {
+        this.name = name;
+        this.desc = desc;
+    }
+}
+This can also be shortened to: // Learnt in Lecture 51
+export class Recipe {
+    constructor(public name:string, public desc:string) {    }
+}
+
+Lecture 48 - Adding Components to the RecipesComponent
+Lecture 49 - Outputting a List of Recipes with ngFor
+Lecture 50 - Displaying Recipe Details
+Lecture 51 - Working on the Shopping List Component
+Lecture 52 - Creating an Ingredient Model
+See Lecture 46
+Lecture 53 - Creating and Outputting the Shopping List
+Lecture 54 - Adding a Shopping List Edit Section
+Lecture 55 - Wrap Up and Next Steps
+
+--------------------------------------------------------------------------------
+SECTION 4
+Lecture 56 - Understanding Angular Error Messages
+Lecture 57 - Debugging Code in the Browser using Soourcemaps
+The compiled files are available in 'sources' section of the Developer tools.
+The most important file in them is the main.bundle.js
+While trying to put a debug point somewhere in the file, the debug point moves to the typescript file. This feature is an addition to javascript (source-mapping).
+The typescript files can be directly accessed from the webpack in the sources tab.
+Lecture 58 - Using Augury to dive into Angular Apps
+Augury is a chrome extension to check all the relations and data of a running Angular App and can be accessed via the Developer Tools.
+
+--------------------------------------------------------------------------------
+
+SECTION 5
+
+Lecture 59 - Module Introduction
+
+Lecture 60 - Splitting Apps Into Components
+The app has been splitted into components and their children. Now it is needed to know how to pass the data in between them.
+
+Lecture 61 - Property and Event Binding Overview
+
+Lecture 62 - Binding to Custom Proeprties
+Even when a property inside a class is public, the property can't be directly accessed from outside (the components hosting it).
+To make sure that they are accessible, add @Input() before the variable declaration.
+@Input() element:ServerElement;
+Make sure to import Input from @angular/core.
+Now it an be bound like this:
+<app-server-element *ngFor="let serverElement of serverElements" [element]="serverElement"></app-server-element>
+                
+Lecture 63 - Assigning an Alias to Custom Proeprties
+An alias can be provided by updating the element definition as:
+@Input('srvElement') element:ServerElement;
+And can be used in the calling component as:
+<app-server-element *ngFor="let serverElement of serverElements" [srvElement]="serverElement"></app-server-element>
+Note: After using the above method, the 'element' can't be used anymore and the 'srvElement' will only work.
+
+Lecture 64 - Binding to Custom Events
+To create a custom event:
+serverAdded = new EventEmitter<{serverName:string, serverContent:string}>();
+Defining a variable as an EventEmitter will make sure that the event can be emitted.
+To make sure that it can accessed from outside, add the @Output() before declaration:
+@Output() serverAdded = new EventEmitter<{serverName:string, serverContent:string}>();
+And can emit by using:
+this.serverAdded.emit({serverName: this.newServerName, serverContent: this.newServerContent});
+Now it can be used as:
+<app-cockpit (serverAdded)="onServerAdded($event)"></app-cockpit>
+
+Lecture 65 - Assigning and Alias to Custom Events
+Alias to be defined as:
+@Output('srvAdded') serverAdded = new EventEmitter<{serverName:string, serverContent:string}>();
+And to be used as:
+<app-cockpit (srvAdded)="onServerAdded($event)"></app-cockpit>
+All other information remains similar to Lecture 62.
+
+Lecture 66 - Custom Property and Event Binding Summary
+While the Input and Output declarations are easy to setup and data can be passed in between views, but when the views are very far linked, these Input/Output can become very difficult to manage.
+In that case, services will come to play.
+
+Lecture 67 - Understanding View Encapsulation
+Angular implements View Encapsulation by using a custom attribute to all the elements inside a particular component. This is known as Shadow DOM.
+Shadow DOM is a new method being applied by browsers, btu it is not fully implemented by all browsers. So Angular emulates it by its own by adding a specific attribute to each of its component, making sure that everything that has been defined by the component is only used by the component, mainly css.
+
+Lecture 68 - More on View Encapsulation
+The encapsulation can be overridden by defining 'encapsulation' in the Component descriptor.
+@Component({
+    ...
+    encapsulation: ViewEncapsulation.None 
+    // other options are also available - Native/Emulated
+    // Native uses the browser capability
+    // Emulated uses the Angular's Shadow DOM
+})
+
+Lecture 69 - Using Local References in Templates
+Local references can be made by adding the reference to the element by using a # followed by the reference name.
+<input type="text" class="form-control" #serverNameElement>
+This reference can be accessed anywhere inside the template, but not outside, not even the ts file.
+
+Lecture 70 - Getting Access to the Template and DOM with @ViewChild
+There is a way of getting access to any element:
+Add the id in the element:
+<input type="text" class="form-control" #serverContentInput>
+And access it using the following in the ts file:
+@ViewChild('serverContentInput') svrContentInput:ElementRef;
+Rather than using 'serverContentInput', one can also use
+@ViewChild(CockpitComponent) svrContentInput:ElementRef;
+This will return the first instance of the particular element. This is generally not used as it is not very specific.
+While one can also use the @ViewChild to set the value like:
+this.svrContentInput.nativeElement.value = "Something";
+one should not use this as it is very risky and the DOM should never be manipulated directly.
+
+Lecture 71 - Projecting Content into Components with ng-content
+Anything placed between our own component will get lost as Angular doesn't care about it.
+<app-cockpit>
+    <h1>This is my own area</h1>
+</app-cockpit>
+In the above case, the h1 tag gets lost and won't be included in the rendering.
+This can be avoided by using the ng-content directive in the cockpit.component.html file:
+<ng-content><ng-content>
+By using this, whatever is placed within the <app-cockpit> tag will get rendered at the position where <ng-content> tag is used in the component.
+* This will help in rendering different types of views based on requirements, depending on where the CustomComponent is used.
+
+Lecture 72 - Understanding the Component Lifecycle
+Angular Component Lifecycle:
+1. ngOnChanges - Called after a bound input property changes. Called during initialization. Called multiple times.
+2. ngOnInit - Called when the component is initialized. it will run after the constructor
+3. ngDoCheck - Called during every change detection run
+4. ngAfterContentInit - Called after content (ng-content) has been projected into view
+5. ngAfterContentChecked - Called every time the projected component has been checked.
+6. ngAfterViewInit - Called after the components view and its children view has been initialized
+7. ngAfterViewChecked - Called every time the view and child views have been checked.
+8. ngOnDestroy - Called once the component is about to be destroyed.
+
+Lecture 73 - Seeing Lifecycle Hooks in Action
+While the Lifecycle functions can be called directly, it is better to 'implement' them on the component to be explicit about what functions are going to be accessed.
+...
+export class MyOwnComponent implements OnInit, OnChanges {
+    ngOnChanges(change:SimpleChange) {
+        
+    }
+    ngOnInit() {
+        
+    }
+}
+This is unchecked and can be rerun and noted down.
+
+Lecture 74 - Lifecycle Hooks and Template Access
+If and any hook applied to templates and being accessed via the @Input() tag in the TypeScript file, the values are only available after the ngAfterViewInit() is called.
+
+Lecture 75 - Getting Access to ng-content with @Content-Child
+The template content that has been defined within the CustomComponent area to be projected into the ng-content area can also be accessed. This can be done by passing a hook #hookname, and can be accessed by using the Content-Child descriptor to access the ElementRef and use it after ngAfterContentInit() is called.
+<app-cockpit>
+    <p #theHook>
+        ...
+    </p>
+</app-cockpit>
+And creating the reference in .ts file by using:
+@ContentChild('theHook') element:ElementRef;
+And access it after the ngAfterContentInit() is called:
+this.element.nativeElement;
+
+Lecture 76 - Wrap Up
+
+--------------------------------------------------------------------------------
+
+SECTION 6
+
+Lecture 77 - Introduction
+
+Lecture 78 - Adding Navigation with Event Binding and ngIf
+
+Lecture 79 - Passing Recipe Data With Property Binding
+
+Lecture 80 - Passing Data with Event and Property Binding (Combined)
+
+Lecture 81 - Allowing the User to Add Ingredients to the Shopping List
+
+--------------------------------------------------------------------------------
+
+SECTION 7
+
+Lecture 82 - Module Introduction
+Attribute Directives vs Structural Directives
+Attribute Directive - Looks like a normal HTML attribute, which only affects the element they are added to.
+Structural Directive - Looks like a normal HTML attribute with a leading * (for desugaring), and affects the whole DOM, as the elements geta dded/removed based on it. For example: *ngIf
+
+Lecture 83 - ngFor and ngIf recap
+Note: We can't have more than one structural directive on one element
+
+Lecture 84 - ngClass and ngStyle recap
+
+Lecture 85 - Creating a Basic Attribute Directive
+basic-highlight.directive.ts
+import { Directive, ElementRef, OnInit } from '@angular/core';
+@Directive({
+    selector: '[appBasicDirective]'
+})
+export class BasicHighlightDirective {
+    constructor(private elementRef:ElementRef) {
+    }
+    ngOnInit() {
+        this.elementRef.nativeElement.style.backgroundColor = 'green';
+    }
+}
+To make this directive available for use in the application, this has to added to AppModule in the declarations tag
+@NgModule({
+    declarations: [
+       AppComponent,
+       BasicHighlightDirective
+    ]
+    ...
+})
+And to use it, simply do:
+<p appBasicDirective>This is a highlighted element.</p>
+
+Lecture 86 - Using the Renderer to build a Better Attribute Directive
+The previous method is not a good practice, as it directly access and sets the values in the DOM.
+better-highlight.directive.ts
+import { Directive, ElementRef, OnInit, Renderer2 } from '@angular/core';
+@Directive({
+    selector: '[appBetterDirective]'
+})
+export class BetterHighlightDirective {
+    constructor(private elementRef:ElementRef, private renderer:Renderer2) {
+    }
+    ngOnInit() {
+        this.renderer.setStyle(this.elementRef.nativeElement, 'background-color', 'blue'); // The fourth argument is optional.
+    }
+}
+To make this directive available for use in the application, this has to added to AppModule in the declarations tag
+@NgModule({
+    declarations: [
+       AppComponent,
+       BetterHighlightDirective
+    ]
+    ...
+})
+And to use it, simply do:
+<p appBetterDirective>This is a highlighted element.</p>
+
+Note: Its better to use the BetterDirective as because Angular runs on multiple platforms, like the service workers, where there is no access to the DOM, so the BasicDirective method won't work.
+
+Lecture 87 - More about the Renderer
+
+Lecture 88 - Using HostListener to Listen to Host Events
+The class BetterHighlightDirective can be upgraded to listen to Host Events by using:
+@HostListener('event-name') localEventName(event:Event) {
+    // Do the specified tasks.
+}
+For example:
+@HostListener('mouseenter') onMouseEnter(event:Event) {
+    this.renderer.setStyle(this.elementRef.nativeElement, 'background-color', 'blue', false, false); // Check why there are multiple false arguments.
+}
+@HostListener('mouseleave') onMouseLeave(event:Event) {
+    this.renderer.setStyle(this.elementRef.nativeElement, 'background-color', 'transparent', false);
+}
+
+Lecture 89 - Using HostBinding to Bind to Host Properties
+There is also another easy way to update the view without using the renderer.
+@HostBinding('propertt-to-bind-to') localPropertyName:string = 'default-value';
+For example:
+@HostBinding('style.backgroundColor') myBackgroundColor:string = 'transparent';
+...
+@HostListener('mouseenter') onMouseEnter(event:Event) {
+    this.myBackgroundColor = "blue";
+}
+@HostListener('mouseleave') onMouseLeave(event:Event) {
+    this.myBackgroundColor = 'transaparent';
+}
+
+Lecture 90 - Binding to Directive Properties
+In the above method, the data are hard-coded and could not be passed by other developers from other classes, or this directive might not be reusable in multiple places.
+@Input() defaultColor:string = 'transparent';
+@Input() hoverColor:string = 'green';
+And can be used to set in the Directive class:
+this.myBackgroundColor = hoverColor;
+Now this can be accessed from outside:
+<p appBetterHighlight [defaultColor]="'yellow'" [hoverColor]="'red'">better-directives works!</p>
+Even if the there are multiple directives in the above line, it might be confusing as to how Angular knows that the directives are of the element or the AttributeDirective. The fact is that Angular automatically knows it by looking at the properties available.
+There is also another method to use the Attribute Selector. If the AttributeSelector is also used as an alias in one of the Input's, then the element where the attribute is used will need some change.
+@Input('appBetterHighlight') defaultColor:string = 'transparent';
+Then it needs to be used as: (Not a preferrable method)
+<p [appBetterHighlight]="'red'" [defaultColor]="'yellow'">better-directives works!</p>
+Also in the above cases, it might be noted that the attribute binding is being used by placing square-brackets around it.
+They can be removed as for usign a shortcut, but then the single-quotation-marks around the values will also need to be removed.
+<p [appBetterHighlight]="'red'" defaultColor="yellow">better-directives works!</p>
+But before using this, one needs to be very sure that the keys don't pertain to any of the actual attributes of the element. And it is a custom attribute for property binding.
+
+Lecture 91 - What happens behind the scenes on Structural Directives
+When using a * in Structural Directives, Angular converts the given piece of template for its own use.
+<div *ngIf="isOdd">
+	<p>This is odd</p>
+</div>
+Gets converted to:
+<ng-template>
+	<div [ngIf]="isOdd">
+		<p>This is odd</p>
+	</div>
+</ng-template>
+
+Lecture 92 - Building a Structural Directive
+@Directive({
+  selector: '[appUnless]'
+})
+export class UnlessDirective {
+	@Input() set appUnless(value:boolean) {
+		if (value) {
+		  this.vcRef.clear();
+		}
+		else {
+		  this.vcRef.createEmbeddedView(this.templateRef);
+		}
+	}
+	constructor(private templateRef:TemplateRef<any>, private vcRef:ViewContainerRef) { }
+}
+One needs to make sure tha the name of the Input matches the name of the Directive to be set, as internally Angular internally converts the StructuralDirective tag to a PropertyBinding tag.
+Now this Structural Directive can be used as:
+<p *appUnless="false">Show this conditionally</p>
+
+Lecture 93 - Understanding ngSwitch
+<div [ngSwitch]="myValue">
+	<p *ngSwitchCase="5">value is 5</p>
+	<p *ngSwitchCase="10">value is 10</p>
+	<p *ngSwitchDefault>value is Default</p>
+</div>
+myValue is a variable.
+
+--------------------------------------------------------------------------------
+
+SECTION 8
+
+Lecture 94 - Building and Using a Dropdown Directive
+
+--------------------------------------------------------------------------------
+
+SECTION 9 - USING SERVICES AND DEPENDENCY INJECTION
+
+Lecture 95 - Module Introduction
+To write reusable tasks that can be used across multiple components.
+This is called as Services in Angular.
+Duplication of Code and Data persistence are two use-cases of Services in Angular.
+
+Lecture 96 - Why would you need Services
+When app becomes large, it is very difficult ot manage the code and replicate them at multiple places. Services come to rescue.
+
+Lecture 97 - Creating a Logging Service
+A Service file is just a normal Typescript file and doesn't need any declaration like that of @Component or @Directive.
+One can import, initialize and access the functions in it.
+mycomponent.component.ts
+onAccountCreated(accountStatus:string) {
+	const loggingService:LogginService = new LoggingService();
+	logginService.logStatusChange(accountStatus);
+}
+While one can use the service the above way, it is not the right way of doing it in Angular.
+
+Lecture 98 - Injecting the Logging Service into Components
+This can be done by instantiating it in the constructor
+@Component({
+	templateUrl: ...
+	...
+	providers: [LoggingService]
+})
+export class AccountComponent {
+	// This line in the constructor tells Angular that an instance of the LoggingService is required by this class.
+	constructor(private loggingService:LoggingService) { }
+	
+	someFunction() {
+		this.logginService.printInfo("Some string");
+	}
+}
+ToDo: While it is explained in this lecture about why the providers is required to use the LogginService, it is not quite clear. Search for more info.
+
+Lecture 99 - Creating a Data Service
+While multiple services were injected to the required classes, changes were getting logged, but the given accounts array isn't getting updated.
+
+Lecture 100 - Understanding the Hierarchical Injector
+When something is injected to a component, it is initialized for that component and all its child components.
+The highest possible level is AppModule. It will provide the same level throughout the app. With it, the same instance of the Service is available throughout the Application.
+Then is the AppComponent. If injected to it, the same instance of the Service will be available for all the components, but not for the other Services.
+If injected to any other component, it will only be available to the component as well its children.
+If the same Service is provided in any Component and in any of its Parent, then the Service in the Child Component (available by the Parent component) will get overwritten with the one provided in the component.
+
+Lecture 101 - How many Instances of Service it should be
+So to make it work what we created in Lecture 98, the concept of Lecture 99 need to be applied.
+As we already had provided the AccountsService in the AppComponent, and were again providing it in the ChildComponents, the instance was getting overwritten. So there were two different instances running in the AppComponent as well as the ChildComponent.
+To make sure that things work, we need not provide the AccountsService in the ChildComponent again. But the constructor declaration is required to make the variable accessible.
+
+Lecture 102 - Injecting Services into Services
+One service can be used inside another by injecting it in the other.
+The service which needs to be injected in any other service needs to be Provided in the AppModule.
+Make the Service Injectable in which the other service is going to be called/initialized.
+Then initialze it in the constructor.
+@Injectable() // Import Injectable from '@angular/core'
+export class AccountsService {
+	constructor(private loggingService:LoggingService) { }
+	...
+}
+
+Lecture 103 - Using Services for Cross-Component Communication
+AccountsService {
+	...
+	statusUpdated = new EventEmitter<string>();
+	...
+}
+AccountComponent {
+	...
+	onSetTo(status) {
+		this.accountsService.statusUpdated.emit(status);
+	}
+	...
+}
+NewAccountComponent {
+	...
+	someFunction() {
+		this.accountsService.statusUpdated.subscribe(
+			(status:string) => {
+				alert("New status: " + status);
+			});
+	}
+}
+
+--------------------------------------------------------------------------------
+
+SECTION 10 - COURSE PROJECT - SERVICES AND DEPENDENCY INJECTION
+
+Lecture 104 - Introduction
+
+Lecture 105 - Setting Up the Services
+
+Lecture 106 - Managing Recipes in a Recipe Service
+
+Lecture 107 - Using a Service for Cross-Component Communication
+Events are being caught in the hierarchial mode. See if they can be caught by anyone implementing the service.
+
+Lecture 108 - Adding the Shopping List Service
+
+Lecture 109 - Using Services for Push Notifications
+
+Lecture 110 - Adding Ingredients to Recipes
+
+Lecture 111 - Passing Ingredients from Recipes to the Shopping List (via a service)
+Spread operator ...
+Normally if we have an array of items, TypeScript provides a way in which they can be added to another array without looping through them all.
+array1.push(...array2);
+This will push the elements of array2 into array1.
+
+--------------------------------------------------------------------------------
+
+SECTION 11 - CHANGING PAGES WITH ROUTING
+
+Lecture 112 - Module Introduction
+
+LEcture 113 - Why do we need a Router
+
+Lecture 114 - Understanding the Example Project
+In the app, there are 3 sections:
+1. Home
+2. Servers
+	- View and Edit Servers
+	- A service is used to load and update Servers
+3. Users
+	- View users.
+	
+Lecture 115 - Setting Up and Loading Routes
+In the AppModule
+import { Routes, RouterModel } from '@angular/router';
+const appRoutes:Routes = [
+	{path: '', component: HomeComponent},
+	{path: 'users', component: UsersComponent},
+	{path: 'servers', component: ServersComponent}
+]
+In the imports, add
+RouterModule.forRoot(appRoutes)
+Add <router-outlet> directive to the place where you want to render the routed views.
+<div class="row">
+	<router-outlet></router-outlet>
+</div>
+
+Lecture 116 - Navigating with Router Links
+And in <a> tags, pass the href relative paths.
+Using href reloads the page while going into the different views. This will rsset all the data the application had in the previous state ( the app state).
+To avoid this problem, there is another way in which routing can be made to work:
+<a routerLink="/services">Services</a>
+In this manner, the page won't reload when the link is clicked.
+There is also another way, by use of PropertyBinding:
+<a [routerLink]="['/users']">Users</a>
+This is helpful for managing multiple level of url paths that can be passed as an array.
+
+Lecture 117 - Understanding Navigation Paths
+Appending / before a path, makes it absolute
+Not appending / , will make it relative
+./ is same to not adding the / at all
+../ works similar to that of folder paths and moves one route back
+
+Lecture 118 - Styling Active Router Links
+The currently selected router links can be made active by using routerLinkActive attribute and setting it to the active css class.
+<li role="presentation"
+	routerLinkActive="active"> // active is the bootstrap css class
+	<a routerLink="/">Home</a>
+</li>
+<li role="presentation"
+	routerLinkActive="active">
+	<a routerLink="/servers">Servers</a>
+</li>
+<li role="presentation"
+	routerLinkActive="active">
+	<a routerLink="/users">Users</a>
+</li>
+The above method will work, but one think to notice is that when the Servers or Users tab is clicked, they get selected, but the Home tab also remains selected at those times.
+This is because, when the routerLinkActive is set, it checks for the availability of the router in the whole url. So when /servers or /users is clicked, it also contains the / url. So the Home also gets the active css class.
+To fix this issue, there is another attribute called [routerLinkActiveOptions] which has to be set via property-binding as it requires an object.
+<li role="presentation"
+	routerLinkActive="active"
+	[routerLinkActiveOptions]="{ exact: true }"> // active is the bootstrap css class
+	<a routerLink="/">Home</a>
+</li>
+<li role="presentation"
+	routerLinkActive="active">
+	<a routerLink="/servers">Servers</a>
+</li>
+<li role="presentation"
+	routerLinkActive="active">
+	<a routerLink="/users">Users</a>
+</li>
+This will make sure that the css class is only applied when the link exactly matches with the route.
+
+Lecture 119 - Navigating Programmatically
+Inject the router to the constructor of whatever class it is required in.
+import { Router } from '@angular/router';
+export class HomeComponent {
+	constructor(private router:Router) { }
+	
+	loadServers() {
+		this.router.navigate(['/servers']); // It takes an array of routes to construct the final route
+	}
+}
+
+Lecture 120 - Using Relative Paths in Programmatic Navigation
+If in the above loadServers(), one removes the absolute url denotion / to:
+this.router.navigate(['servers']);
+It still wouldn't break the app and Angular would still load "www.app.com/servers"
+This is because, while calling the navigate function, Angular doesn't know where is the route is currently at.
+To know that, one needs to pass on that information which can be found in the ActivatedRoute class. So one needs to inject it into the constructor whenever it is required, and then pass on the information to the navigate() function.
+So the above class would become:
+import { Router, ActivatedRoute } from '@angular/router';
+export class ServersComponent {
+	constructor(private router:Router, private activatedRoute:ActivatedRoute) { }
+	
+	loadServers() {
+		this.router.navigate(['/servers'], { relativeTo: this.activatedRoute });
+	}
+}
+
+Lecture 121 - Passing Parameters to Routes
+Anything passed with a colon beofe it in a route will be considered as an argument.
+/users/:id - Here anything passed after the /users/ wil be considered as an id. 
+Multiple parameters can also be passed.
+{ path: 'users/:id/:name', component: UserComponent }
+
+Lecture 122 - Fetching Route Parameters
+To get access to the parameters, in the component rendering the route, inject the ActivatedRoute in the constructor (imported from @angular/router).
+And in ngOnInit, fetch the parameter from the ActivatedRoute
+this.activatedRoute.snapshot.paramas["user_id"]
+If multiple parameters have been passed: /users/:user_id/:user_name, these can also be parsed by using
+
+export class UserComponent {
+    constructor(private activatedRoute:ActivatedRoute) { }
+    ngOnInit() {
+        this.user = {
+            id: this.activatedRoute.snapshot.params['id'],
+            name: this.activatedRoute.snapshot.params['name']
+        };
+    }
+}
+
+Lecture 123 - Fetching Route Parameters Reactively
+In the previous example, if the same route is called from within the view, then the view will not update with the updated data.
+<a [routerLink]="['/users', 10, 'Anna']">Load Anna</a>
+This link when clicked will update the url, but the data in the view won't update. This is because, we only fetched the activatedRoute.snapshot on ngOnInit() of the view, and if we just change the data internally, the view is not getting initialized again, and hence has no idea that the data changed.
+This happens because when the params get updated, Angular searches for the view to render and if it is the same as the current view, it doesn't reinitialize it.
+So as because in the previous step we only updated the user data on ngOnInit(), the data didn't get updated on url change.
+To make sure that the view works fine, one needs to subscribe to the changes happening to the route.
+export class UserComponent {
+    constructor(private activatedRoute:ActivatedRoute) { }
+    ngOnInit() {
+        this.user = {
+            id: this.activatedRoute.snapshot.params['id'],
+            name: this.activatedRoute.snapshot.params['name']
+        };
+        this.activatedRoute.params.subscribe((params:Params) => {
+            this.user.id = params['id'];
+            this.user.name = params['name'];
+        });
+    }
+}
+In the above line of code, params is an observable.
+Observables is not a feature of Angular, but is heavily used by Angular to look forward for asynchronous tasks.
+Observable is something that might happen in the future, so we subscribe to it to know if it happens and whenever it happens, we want to execute some code.
+
+
+Lecture 124 - An Important Note About Route Observables
+When the view is removed from view, Angular removes the view, its associated children and the event listeners in there. So one doesn't need to do that manually.
+But in case when custom observables are being created, it is required to remove everything manually in the ngOnDestroy method.
+To do that, store the subscription in a variable (of type Subscription whih needs to be imported from erxjs/Subscription) and unsubscrive from that in the ngOnDestory method of the class.
+import { Subscription } from 'rxjs/Subscription';
+export class UserComponent implements OnInit, OnDestroy {
+	ngOnInit() {
+		this.paramsSubscription = this.activatedRoute.params.subscribe(
+			(params:Params) => {
+				this.user.id = params["user_id"];
+				this.user.name = params["user_name"];
+			}
+		);
+	}
+	
+	ngOnDestory() {
+		this.paramsSubscription.unsubscribe();
+	}
+}
+
+Lecture 125 - Passing Query Parameters and Fragments
+In a url like http://localhost/users/1/someone?mode=edit#load
+The part that follows the ? in a url (mode=edit) is the query parameter. There can be multiple of them, separated by &
+The part that follows the #  is the Fragment. There can only be one fragment.
+<a
+	[routerLink]="['/servers', 5, 'edit]"
+	[queryParams]="{allowEdit: 1, sure: 'yes' }"
+	fragment="loading" //[fragment]="['loading']" - Can also be passed as this
+	class="list-group-item">
+	{{ server.name }}
+</a>
+queryParams is a bindable property of the routerLink directive.
+In typescript can be used as
+this.router.navigate(
+    ['/servers', id, 'edit'],
+    {
+		queryParams: { allowEdit: 1 },
+        fragment: 'loadingnow'
+    }
+);
+
+Lecture 126 - Retrieving Query Parameters and Fragments
+Similar to the routerLinks, the query parameters as well as the fragment can be accessed from the snapshot property, or changes can be registered by subscribing to changes of the specific properties.
+    console.log(this.activatedRoute.snapshot.queryParams['allowEdit']);
+    console.log(this.activatedRoute.snapshot.fragment);
+    
+    this.activatedRoute.queryParams.subscribe(
+      (data:Params) => {
+        console.log(data['allowEdit']);
+      }
+    );
+    
+    this.activatedRoute.fragment.subscribe(
+      (data:Params) => {
+        console.log(data);
+      }
+    );
+	
+Lecture 127 - Practicing and Some Common Gotchas
+
+
+
+================================================================================
+
+OTHER NOTES:
+
+Note 1:
+The this scope isn't available in anonymous functions, so as a workaround a variable is defined in the function where the anonynous function is defined and a reference to the this keyword is saved. Now the anonymous function can use this variable to get access to the variables defined in the class.
+While in the case of arrow functions, it stores the this variable as a local reference to the class.
+export class GameControl {
+    onStartClick() {
+        // Doing it the normal way
+        var self = this;
+        setInterval(function() {
+            console.log("Working " + (++self.counter));
+        }, 1000);
+        // Doing it the arrow function way
+        setInterval(() => {
+            console.log("Working " + (++this.counter));
+        }, 1000);
+    }
+}
+
+Note 2:
+In Javsascript, object are passed around as references. So workarounds should be used:
+For Arrays, one could use the arrayName.slice() to get a copy of the array and not its reference.
+
+Note 3:

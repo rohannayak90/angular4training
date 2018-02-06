@@ -1,0 +1,12 @@
+<div class="row">
+    <button class="btn btn-primary" style="display:inline-block" (click)="onButtonClick()">Display Details</button>
+    <p style="display:inline-block; float: right" *ngIf="showParagraph">Some random text</p>
+</div>
+<!--<p *ngFor="let item of clickCounter"
+    [ngStyle]="{backgroundColor: item > 4 ? 'red' : ''}"
+    [ngClass]="{whiteText: item > 4}">{{ item }}</p> -->
+<!-- Second way of doing, using index -->    
+<p *ngFor="let item of clickCounter; let i = index"
+    [ngStyle]="{backgroundColor: i >= 4 ? 'red' : ''}"
+    [ngClass]="{whiteText: i >= 4}">{{ item }}</p>
+

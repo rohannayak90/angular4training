@@ -1,0 +1,17 @@
+<div class="container">
+    <p basicHighlightDirective>basic-directives works!</p>
+    <p appBetterHighlight>better-directives works!</p>
+    
+    <p appBetterHighlight [defaultColor]="'yellow'" [hoverColor]="'red'">better-directives works!</p>
+    
+    <p appBetterHighlight [defaultColor]="'yellow'" hoverColor="red">better-directives works!</p>
+    
+    <p *appUnless="false">Show this conditionally</p>
+    <p *appUnless="true">Hide this conditionally</p>
+    
+    <div [ngSwitch]="myValue">
+        <p *ngSwitchCase="5">Value is 5</p>
+        <p *ngSwitchCase="15">Value is 15</p>
+        <p *ngSwitchDefault>Value is Default</p>
+    </div>
+</div>
