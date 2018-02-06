@@ -1,0 +1,15 @@
+<div class="container">
+    <h1>This is the ServersComponent</h1>
+    <label>Server Name</label>
+    <input type="text"
+        class="form-control"
+        (input)="onUpdateServerName($event)">
+    <input type="text"
+        class="form-control"
+        [(ngModel)]="serverName">
+    <button class="btn btn-primary" [disabled]="!allowNewServer" (click)="onServerCreated()">Click</button>
+    <p>{{ allowNewServer }}</p>
+    <p [innerText]="serverCreationStatus"></p>
+    <p *ngIf="serverCreated">Created Server {{ serverName }}</p>
+    <app-server *ngFor="let server of servers"></app-server>
+</div>
