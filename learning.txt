@@ -899,8 +899,253 @@ Similar to the routerLinks, the query parameters as well as the fragment can be 
         console.log(data);
       }
     );
-	
+
 Lecture 127 - Practicing and Some Common Gotchas
+In this case where the user_id or the server_id is a string, it is sometime possible that one might try to directly se it somehwere expecting a number.
+getServerByID(id:number) { }
+If one tries to:
+var id = this.activatedRoute.snapshot.params['id']
+getServerByID(id) // This would fail.
+That's because the id when fetched from the url is a string by default and trying to pass a string to a function expecting a number would throw an error.
+To resolved this, the string can be typecasted to a number by adding a + before it.
+So,
+var id = this.activatedRoute.snapshot.params['id']
+getServerByID(+id) // This would work
+
+Lecture 128 - Setting up Child (Nested) Routes
+const appRoutes:Routes = [
+	{path: 'servers', component: ServersComponent},
+	{path: 'servers/:id', component: ServerComponent},
+	{path: 'servers/:id/edit', component: EditServerComponent}
+];
+To nest the routes, one can do
+const appRoutes:Routes = [
+	{path: 'servers', component: ServersComponent, children[
+		{path: ':id', component: ServerComponent},
+		{path: ':id/edit', component: EditServerComponent}
+	]},
+];
+While this would simiplify things a bit, but would throw a runtime error.
+To resolve this, and outlet needs to be provided for the children. This can be done by adding:
+<router-outlet></router-outlet>
+to the parent view.
+TODO -  See what can be done if the same router view needs to be added inside a parent router and needs to be accessed directly.
+
+Lecture 129 - Using Query Parameters - Practice
+When moving around using the navigate method, the query parameters get lost.
+
+Lecture 130 - COnfiguring the Handling of Query Parameters
+A new attribute needs to be added to the second parameter of the navigate function.
+this.router.navigate(['edit'], { relativeTo: this.activatedRoute, queryParamsHandling: 'preserve' });
+queryParamsHandling - takes a string
+Can be set to 'preserve' or 'merge'
+'preserve' will drop the new ones and override with the old ones.
+'merge' will merge the old query params with any new query params being added to the currently navigate method.
+
+Lecture 131 - Redirecting and Wildcard Routes
+When we enter a route in the url abr when it is not available, the Angular throws an error.
+To do that create a page-not-found component, and add it as a route to something like '404' or 'not-found'.
+And in the last add a ** route and redirectTo the 404 route.
+const appRoutes:Routes = [
+	...,
+	{ path: '404', component: PageNotFoundComponent },
+	{ path: '**', redirectTo: '/404' }
+];
+Make sure to add the ** path as the last route in the Routes array.
+
+Lecture 132 - Important: Redirection Path Matching
+A little difficult to understand/implement
+
+Lecture 133 - Outsourcing the Route Configuration
+When the routes count increases, it is better to outsource it to another file.
+To do that create a new file named app-routing.module.ts
+const appRoutes:Routes = [
+	{ path: '', component: HomeComponent },
+	{ path: 'users', component: UsersComponent, children: [
+      	{ path: ':id', component: UserComponent },
+      	{ path: ':id/:name', component: UserComponent }
+	]},
+	{ path: 'servers', component: ServersComponent, children: [
+      	{ path: ':id', component: ServerComponent },
+      	{ path: ':id/edit', component: EditServerComponent }
+	]},
+	{ path: '404', component: PageNotFoundComponent },
+	{ path: '**', redirectTo: '/404' }
+];
+@NgModule({
+    imports: [
+        RouterModule.forRoot(appRoutes)
+    ],
+    exports: [
+        RouterModule
+    ]
+})
+export class AppRoutingModule { }
+And this can be then added to AppModule imports []
+
+Lecture 134 - An Introduction to Guards
+When authentication is required, it would be cumbersome to replicate the check everywhere in the code.
+So Angular provides a way to run some code before the route gets activated using canActivateGuard
+
+Lecture 135 - Protecting Routes with canActivate
+Create a file named auth-guard.service.ts
+Make it Injectable, so that the AuthService can be injected into it.
+@Injectable()
+export class AuthGuard implements CanActivate {
+	constructor(private authService:AuthService, private router:Router) {	}
+	
+	canActivate(activatedRouteSnapshot:ActivatedRouteSnapshot, routerStateSnapshot:RouterStateSnapshot):Observable<boolean> | Promise<boolean> | boolean {
+		return this.authService.isAuthenticated().then(
+            (authenticated:boolean) => {
+                if (authenticated)
+                    return true;
+                else
+                    this.router.navigate(['/']);
+            }
+        );
+	}
+}
+Another file named auth.service.ts This fakes a real authentication module.
+export class AuthService {
+    loggedIn = false;
+    
+    isAuthenticated() {
+        const promise = new Promise(
+            (resolve, reject) => {
+                setTimeout(() => { resolve(this.loggedIn); }, 800);
+            }
+        );        
+        return promise;
+    }
+    
+    logIn() { this.loggedIn = true; }
+    
+    logOut() { this.loggedIn = false; }
+}
+The canActivate function can return an Observable<boolean> or a Promise<boolean> or simply a 'boolean'
+So this function can work both asynchronously (Observable, Promise) or synchronously (boolean)
+Add this 2 services to the providers list in AppModule.
+Then, in the AppRoutes, provide as
+{ path: 'servers', canActivate: [AuthGuard], component: ServersComponent, children: [
+    { path: ':id', component: ServerComponent },
+    { path: ':id/edit', component: EditServerComponent }
+]},
+The canActivate can have an array of Guards to pass through before proceeding onto the Route view.
+In the above case, it will always redirect to home page on clicking Servers, because the loggedIn has been set to false.
+
+Lecture 136 - Protecting Child (Nested) Routes with canActivateChild
+The canActivateChild can be used to guard the children of a particular route.
+For this the AuthGuard needs to implement the CanActivateChild interface. So the earlier AuthGuard class becomes:
+@Injectable()
+export class AuthGuard implements CanActivate, CanActivateChild {
+	constructor(private authService:AuthService, private router:Router) {	}
+	
+	canActivate(activatedRouteSnapshot:ActivatedRouteSnapshot, routerStateSnapshot:RouterStateSnapshot):Observable<boolean> | Promise<boolean> | boolean {
+		return this.authService.isAuthenticated().then(
+            (authenticated:boolean) => {
+                if (authenticated)
+                    return true;
+                else
+                    this.router.navigate(['/']);
+            }
+        );
+	}
+	
+	canActivateChild(activatedRouteSnapshot:ActivatedRouteSnapshot, routerStateSnapshot:RouterStateSnapshot):Observable<boolean> | Promise<boolean> | boolean {
+		return this.canActivate(activatedRouteSnapshot, routerStateSnapshot);
+	}
+}
+Now the AppRoutes can be updated as:
+{ path: 'servers', canActivateChild: [AuthGuard], component: ServersComponent, children: [
+    { path: ':id', component: ServerComponent },
+    { path: ':id/edit', component: EditServerComponent }
+]},
+If the canActivate is not guarded and the canActivateChild is passed, then the /servers/ can be opened without authorization, but not the children.
+
+Lecture 137 - Using a Fake Auth Service
+
+Lecture 138 - Controlling Navigation with canDeactivate
+As we can control if we can navigate into a router, we can also manage if someone can navigate away from a router.
+This comes helpful if the user has done some changes and haven't saved it yet.
+In the edit-server folder add a new file named can-deactivate-guard.service.ts with the following code:
+export interface ICanDeactivateComponent {
+    canDeactivate:() => Observable<boolean> | Promise<boolean> | boolean;
+}
+CanDeactivate is a generic type and will wrap our own interface
+export class CanDeactivateGuard implements CanDeactivate<ICanDeactivateComponent> {
+    canDeactivate(component:ICanDeactivateComponent,
+        activatedRouteSnapshot:ActivatedRouteSnapshot,
+        currentStateSnapshot:RouterStateSnapshot,
+        nextStateSnapshot?:RouterStateSnapshot):Observable<boolean> | Promise<boolean> | boolean {
+        
+        return component.canDeactivate();
+    }
+}
+Now the component needs to also implement the ICanComponentDeactivate interface, and have the canDeactivate() which will contain the logic to allow/disallow the user from redirecting to the new Route.
+export class EditServerComponent implements OnInit, ICanDeactivateComponent {
+	canDeactivate():Observable<boolean> | Promise<boolean> | boolean {
+		if (this.allowEdit) {
+		  if ((this.serverName !== this.server.name || this.serverStatus !== this.server.status) && !this.changesSaved) {
+			return confirm("Do you want to discard the changes?");
+		  }
+		}
+		return true;
+	}
+}
+Add the CanDeactivateRoute to the route's parameters
+{ path: ':id/edit', component: EditServerComponent, canDeactivate: [CanDeactivateGuard] }
+and also add it to the AppModule providers array.
+
+Lecture 139 - Passing Static Data to Route
+One can also pass data to the route via the data property in the route.
+For example in an error page, one might need to some dynamic message that has been passed from the route.
+{ path: '404', component: PageNotFoundComponent, data: { message: 'Page Not Found!'} },
+And in the component, the data can be fetched by accessing it from the ActivatedRoute.
+export class PageNotFoundComponent implements OnInit {
+  // The errorMessage can be string-interpolated to the html view.
+  errorMessage:string;
+  
+  constructor(private activatedRoute:ActivatedRoute) { }
+
+  ngOnInit() {
+    this.errorMessage = this.activatedRoute.snapshot.data['message'];
+    // One can also subscribe to changes in the data.
+    this.activatedRoute.data.subscribe((data:Data) => {
+      this.errorMessage = data['message'];
+    });
+  }
+}
+
+Lecture 140 - Resolving Dynamic Data with the Resolve Guard
+Sometimes it is required to wait for the data to load and then only update the screen based on the data.
+server-resolver.service.ts
+interface Server {
+    id:number;
+    name:string;
+    status:string;
+}
+@Injectable()
+export class ServerResolver implements Resolve<Server> {
+    constructor(private serversService:ServersService) {}
+    resolve(activatedRouteSnapshot:ActivatedRouteSnapshot, routerStateSnapshot:RouterStateSnapshot):Observable<Server> | Promise<Server> | Server {
+        
+        return this.serversService.getServer(+activatedRouteSnapshot.params['id']);
+    }
+}
+Add this ServerResolver to the AppModule in the providers array.
+In the AppRouting module, add the resolve parameter. Anything passed in the key can be accessed from the activatedRoute.data
+{ path: ':id', component: ServerComponent, resolve: { server: ServerResolver} },
+Now the server.component.ts can be updated for:
+ngOnInit() {    
+	this.activatedRoute.data.subscribe((data:Data) => {
+		this.server = data['server'];
+    });
+}
+
+
+
+
+
 
 
 
@@ -930,3 +1175,5 @@ In Javsascript, object are passed around as references. So workarounds should be
 For Arrays, one could use the arrayName.slice() to get a copy of the array and not its reference.
 
 Note 3:
+Optional parameters can be passed by using the ? after the argument name. 
+stateSnapshot?:RouterStateSnapshot

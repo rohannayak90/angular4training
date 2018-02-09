@@ -1,8 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Routes, RouterModule } from '@angular/router';
-
 
 import { AppComponent } from './app.component';
 //import { ServersComponent } from './project-servers/servers/servers.component';
@@ -43,16 +41,12 @@ import { UsersComponent } from './project-servers/server-creator2/users/users.co
 import { UserComponent } from './project-servers/server-creator2/users/user/user.component';
 import { EditServerComponent } from './project-servers/server-creator2/servers/edit-server/edit-server.component';
 import { ServersService } from './project-servers/server-creator2/servers/servers.service';
-
-const appRoutes:Routes = [
-  {path: '', component: HomeComponent},
-	{path: 'users', component: UsersComponent},
-	{path: 'users/:id', component: UserComponent},
-	{path: 'users/:id/:name', component: UserComponent},
-	{path: 'servers', component: ServersComponent},
-	{path: 'servers/:id', component: ServerComponent},
-	{path: 'servers/:id/edit', component: EditServerComponent}
-];
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { AppRoutingModule } from './app-routing.module';
+import { AuthService } from './auth.service';
+import { AuthGuard } from './auth-guard.service';
+import { CanDeactivateGuard } from './project-servers/server-creator2/servers/edit-server/can-deactivate-guard.service';
+import { ServerResolver } from './project-servers/server-creator2/servers/server/server-resolver.service';
 
 @NgModule({
   declarations: [
@@ -89,17 +83,22 @@ const appRoutes:Routes = [
     HomeComponent,
     UsersComponent,
     UserComponent,
-    EditServerComponent
+    EditServerComponent,
+    PageNotFoundComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
-    RouterModule.forRoot(appRoutes)
+    AppRoutingModule
   ],
   providers: [
     CounterService,
     ShoppingListService,
-    ServersService
+    ServersService,
+    AuthService,
+    AuthGuard,
+    CanDeactivateGuard,
+    ServerResolver
   ],
   bootstrap: [AppComponent]
 })
